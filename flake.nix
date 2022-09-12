@@ -1,5 +1,5 @@
 {
-  description = "test";
+  description = "A collection of tools to help with developing for Panic's Playdate.";
 
   outputs = { self, nixpkgs }: 
   let
@@ -11,6 +11,7 @@
       name = "PlaydateSimulator";
       targetPkgs = pkgs:
       [
+          pkgs.wrapGAppsHook
           pkgs.glib
           pkgs.gdk-pixbuf
           pkgs.cairo
@@ -25,7 +26,7 @@
           pkgs.xorg.libXcursor
           pkgs.xorg.libXrandr
         ];
-        runScript = "PlaydateSimulator";
+        runScript = ''~/playdate_sdk-1.12.3/bin/PlaydateSimulator'';
     };
     pdc = pkgs.buildFHSUserEnv {
       name = "pdc";
@@ -36,7 +37,7 @@
           pkgs.pkg-config
           pdsdk
         ];
-        runScript = "pdc";
+        runScript = ''~/playdate_sdk-1.12.3/bin/pdc'';
       };
     pdutil = pkgs.buildFHSUserEnv {
       name = "pdutil";
@@ -47,10 +48,19 @@
           pkgs.pkg-config
           pdsdk
         ];
-        runScript = "pdutil";
+        runScript = ''~/playdate_sdk-1.12.3/bin/pdutil'';
     };
     shell = pkgs.mkShell {
+      shellHook = ''
+        # Copy the Playdate SDK into the home folder if it is not there.
+        if ! [[ -d ~/playdate_sdk ]]; then cp -r $(realpath $(dirname $(realpath $(which PlaydateSimulatorFromSDK)))/../) ~;chmod -R +rw ~/playdate_sdk-1.12.3/;chown -R $USER ~/playdate_sdk-1.12.3/; fi;
+        # Set the PLAYDATE_SDK_PATH to the copy.
+        export PLAYDATE_SDK_PATH=~/playdate_sdk-1.12.3/
+        # Set the GSETTINGS_SCHEMA_DIR to the proper location to let PlaydateSimulator use org.gtk.Settings.FileChooser for picking the SDK location.
+        export GSETTINGS_SCHEMA_DIR=${pkgs.glib.getSchemaPath pkgs.gtk3}
+                '';
       packages = [ 
+        pdsdk
         pdc
         pdutil
         pds
@@ -60,6 +70,7 @@
   {
     packages.x86_64-linux.PlaydateSimualtor = pds;
     packages.x86_64-linux.pdc = pdc;
+    packages.x86_64-linux.pdutil = pdutil;
     defaultPackage.x86_64-linux = shell;
   };
 }
