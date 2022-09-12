@@ -58,6 +58,8 @@
         export PLAYDATE_SDK_PATH=~/playdate_sdk-1.12.3/
         # Set the GSETTINGS_SCHEMA_DIR to the proper location to let PlaydateSimulator use org.gtk.Settings.FileChooser for picking the SDK location.
         export GSETTINGS_SCHEMA_DIR=${pkgs.glib.getSchemaPath pkgs.gtk3}
+        # Set the XDG_DATA_DIRS to the proper location to let PlaydateSimualtor show proper icons in the FileChooser.
+        export XDG_DATA_DIRS=$HOME/.nix-profile/share:/usr/local/share:/usr/share
                 '';
       packages = [ 
         pdsdk
