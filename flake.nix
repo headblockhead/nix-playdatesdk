@@ -55,7 +55,7 @@
         # Copy the Playdate SDK into the home folder if it is not there.
         if ! [[ -d ~/playdate_sdk ]]; then cp -r $(realpath $(dirname $(realpath $(which PlaydateSimulatorFromSDK)))/../) ~;chmod -R +rw ~/playdate_sdk-1.12.3/;chown -R $USER ~/playdate_sdk-1.12.3/; fi;
         # Set the PLAYDATE_SDK_PATH to the copy.
-        export PLAYDATE_SDK_PATH=~/playdate_sdk-1.12.3/
+        export PLAYDATE_SDK_PATH=~/playdate_sdk-1.12.3
         # Set the GSETTINGS_SCHEMA_DIR to the proper location to let PlaydateSimulator use org.gtk.Settings.FileChooser for picking the SDK location.
         export GSETTINGS_SCHEMA_DIR=${pkgs.glib.getSchemaPath pkgs.gtk3}
         # Set the XDG_DATA_DIRS to the proper location to let PlaydateSimualtor show proper icons in the FileChooser.
