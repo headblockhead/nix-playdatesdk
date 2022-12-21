@@ -1,7 +1,7 @@
 # Create the standard environment.
 source $stdenv/setup
 # Extract the source code.
-tar xvfz $src
+tar xvfz $sdksrc
 # Store the SDK in a place where it is accessible and writeable
 mkdir -p $out/opt/playdate_sdk-1.12.3
 # Create place to store the binaries.
@@ -12,3 +12,5 @@ cp -r PlaydateSDK-1.12.3/* $out/opt/playdate_sdk-1.12.3
 ln -s $out/opt/playdate_sdk-1.12.3/bin/PlaydateSimulator $out/bin/PlaydateSimulatorFromSDK
 ln -s $out/opt/playdate_sdk-1.12.3/bin/pdc $out/bin/pdcFromSDK
 ln -s $out/opt/playdate_sdk-1.12.3/bin/pdutil $out/bin/pdutilFromSDK
+# Patch the SDK to use the proper binaries and not the binaries from the SDK itself.
+patch -i $patchsrc $out/opt/playdate_sdk-1.12.3/C_API/buildsupport/common.mk

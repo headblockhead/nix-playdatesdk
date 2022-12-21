@@ -1,0 +1,11 @@
+--- C_API/buildsupport/common.mk	2022-08-11 18:10:10.000000000 +0100
++++ C_API/buildsupport/common.mk 2022-08-11 18:10:10.000000000 +0100
+@@ -30,7 +30,7 @@
+ GCC = /usr/local/bin/
+ endif
+ 
+-PDC = $(SDK)/bin/pdc
++PDC = pdc
+ 
+ VPATH += $(SDK)/C_API/buildsupport
+ 
