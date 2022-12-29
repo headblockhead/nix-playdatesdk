@@ -13,4 +13,5 @@ ln -s $out/opt/playdate_sdk-1.12.3/bin/PlaydateSimulator $out/bin/PlaydateSimula
 ln -s $out/opt/playdate_sdk-1.12.3/bin/pdc $out/bin/pdcFromSDK
 ln -s $out/opt/playdate_sdk-1.12.3/bin/pdutil $out/bin/pdutilFromSDK
 # Patch the SDK to use the proper binaries and not the binaries from the SDK itself.
-patch -i $patchsrc $out/opt/playdate_sdk-1.12.3/C_API/buildsupport/common.mk
+patch -i $patch1src $out/opt/playdate_sdk-1.12.3/C_API/buildsupport/common.mk
+patch -i $patch2src $out/opt/playdate_sdk-1.12.3/C_API/buildsupport/playdate.cmake

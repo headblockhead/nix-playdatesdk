@@ -1,0 +1,12 @@
+--- playdate.cmake	2022-12-29 13:25:31.340243697 +0000
++++ playdate.cmake	2022-12-29 13:25:13.565210960 +0000
+@@ -9,7 +9,7 @@
+ include_directories("${SDK}/C_API")
+ message(STATUS "SDK Path: " ${SDK})
+ 
++set(PDC "pdc")
+-set(PDC "${SDK}/bin/pdc" -sdkpath "${SDK}")
+ 
+ add_compile_definitions(TARGET_EXTENSION=1)
+ 
+
