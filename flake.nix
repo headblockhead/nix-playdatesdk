@@ -66,7 +66,7 @@
         pdc
         pdutil
         pds
-        pkgs.gcc-arm-embedded-10 # Used for building C projects.
+        pkgs.gcc-arm-embedded # Used for building C projects.
       ];
     };
   in
