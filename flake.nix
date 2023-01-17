@@ -1,79 +1,100 @@
 {
   description = "A collection of tools to help with developing for Panic's Playdate.";
 
-  outputs = { self, nixpkgs }: 
-  let
-    pkgs = import nixpkgs {
-      system = "x86_64-linux";
-    };
-    pdsdk = pkgs.callPackage ./sdk.nix {};
-    pds = pkgs.buildFHSUserEnv {
-      name = "PlaydateSimulator";
-      targetPkgs = pkgs:
-      [
-          pkgs.wrapGAppsHook
-          pkgs.glib
-          pkgs.gdk-pixbuf
-          pkgs.cairo
-          pkgs.pango
-          pkgs.udev
-          pkgs.alsa-lib
-          pkgs.gtk3
-          pkgs.webkitgtk
-          pkgs.pkg-config
-          pdsdk
-          pkgs.xorg.libX11
-          pkgs.xorg.libXcursor
-          pkgs.xorg.libXrandr
-        ];
-        runScript = ''~/playdate_sdk-1.12.3/bin/PlaydateSimulator'';
-    };
-    pdc = pkgs.buildFHSUserEnv {
-      name = "pdc";
-      targetPkgs = pkgs:
-      [
-        pkgs.zlib
-          pkgs.libpng
-          pkgs.pkg-config
-          pdsdk
-        ];
-        runScript = ''~/playdate_sdk-1.12.3/bin/pdc'';
+  inputs = { nixpkgs.url = "github:NixOS/nixpkgs"; };
+
+  outputs = { self, nixpkgs }:
+    with import nixpkgs { system = "x86_64-linux"; };
+    let
+      version = "1.12.3";
+      playdateSDK = pkgs.fetchurl {
+        url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
+        sha256 = "6QZb7Ie6LaSAa5fK8qjDGSWt4AzgCimFo2IGp685XWo=";
       };
-    pdutil = pkgs.buildFHSUserEnv {
-      name = "pdutil";
-      targetPkgs = pkgs:
-      [
-        pkgs.zlib
-          pkgs.libpng
-          pkgs.pkg-config
-          pdsdk
-        ];
-        runScript = ''~/playdate_sdk-1.12.3/bin/pdutil'';
+      pdc = stdenv.mkDerivation rec {
+        name = "pdc-${version}";
+        src = playdateSDK;
+        nativeBuildInputs = [ autoPatchelfHook ];
+
+        buildInputs = [ pkgs.zlib pkgs.libpng ];
+        installPhase = ''
+          tar xvfz $src
+          mkdir -p $out/bin
+          cp -r PlaydateSDK-1.12.3/bin/pdc $out/bin/pdc
+        '';
+        sourceRoot = ".";
+        meta = with lib; {
+          homepage = "https://play.date/dev";
+          description = "The PlayDateCompiler, used for compiling Playdate projects - part of the PlaydateSDK";
+          platforms = platforms.linux;
+        };
+      };
+      pdutil = stdenv.mkDerivation rec {
+        name = "pdutil-${version}";
+        src = playdateSDK;
+        nativeBuildInputs = [ autoPatchelfHook ];
+
+        buildInputs = [ pkgs.zlib pkgs.libpng ];
+        installPhase = ''
+                    tar xvfz $src
+                    mkdir -p $out/bin
+          cp -r PlaydateSDK-1.12.3/bin/pdutil $out/bin/pdutil
+        '';
+        sourceRoot = ".";
+        meta = with lib; {
+          homepage = "https://play.date/dev";
+          description = "The PlayDateUtil, used for interacting with the PlayDate device - part of the PlaydateSDK";
+          platforms = platforms.linux;
+        };
+      };
+      PlaydateSimulator = stdenv.mkDerivation rec {
+        name = "PlaydateSimulator-${version}";
+        src = playdateSDK;
+        nativeBuildInputs = [ autoPatchelfHook ];
+
+        buildInputs = [ pkgs.webkitgtk ];
+        installPhase = ''
+          tar xvfz $src
+          mkdir -p $out/bin
+          cp -r PlaydateSDK-1.12.3/bin/PlaydateSimulator $out/bin/pds
+        '';
+        sourceRoot = ".";
+        meta = with lib; {
+          homepage = "https://play.date/dev";
+          description = "The PlaydateSimulator, used for simulating and interacting with the PlayDate device - part of the PlaydateSDK";
+          platforms = platforms.linux;
+        };
+      };
+      PlaydateSimulatorWrapped = pkgs.buildFHSUserEnv {
+        name = "PlaydateSimulator";
+        targetPkgs = pkgs: [ pkgs.alsa-lib PlaydateSimulator ];
+        runScript = "pds";
+      };
+      shell = pkgs.mkShell {
+        shellHook = ''
+                    if ! [[ -d $HOME/playdatesdk-${version} ]]; then
+                          tar -xzvf ${playdateSDK}
+                          mkdir $HOME/playdatesdk-${version}
+                          mv PlaydateSDK-1.12.3/* $HOME/playdatesdk-${version}
+                          ln -sf ${pdc}/bin/pdc $HOME/playdatesdk-${version}/bin/pdc
+                          ln -sf ${pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
+                          ln -sf ${PlaydateSimulatorWrapped}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
+                          if ! [[ -d "$HOME/.Playdate Simulator/" ]]; then
+                          mkdir $HOME/.Playdate\ Simulator/
+                          echo "SDKDirectory=$HOME/playdatesdk-${version}" >> "$HOME/.Playdate Simulator/Playdate Simulator.ini"
+          fi
+                          fi
+                          export PLAYDATE_SDK_PATH=$HOME/playdatesdk-${version}
+        '';
+        packages = [ PlaydateSimulatorWrapped pdc pdutil ];
+      };
+
+    in {
+      packages.x86_64-linux.pdc = pdc;
+      packages.x86_64-linux.pdutil = pdutil;
+      packages.x86_64-linux.PlaydateSimulator = PlaydateSimulatorWrapped;
+      defaultPackage.x86_64-linux = shell;
     };
-    shell = pkgs.mkShell {
-      shellHook = ''
-        # Copy the Playdate SDK into the home folder if it is not there.
-        if ! [[ -d ~/playdate_sdk ]]; then cp -r $(realpath $(dirname $(realpath $(which PlaydateSimulatorFromSDK)))/../) ~;chmod -R +rw ~/playdate_sdk-1.12.3/;chown -R $USER ~/playdate_sdk-1.12.3/; fi;
-        # Set the PLAYDATE_SDK_PATH to the copy.
-        export PLAYDATE_SDK_PATH=~/playdate_sdk-1.12.3
-        # Set the GSETTINGS_SCHEMA_DIR to the proper location to let PlaydateSimulator use org.gtk.Settings.FileChooser for picking the SDK location.
-        export GSETTINGS_SCHEMA_DIR=${pkgs.glib.getSchemaPath pkgs.gtk3}
-        # Set the XDG_DATA_DIRS to the proper location to let PlaydateSimualtor show proper icons in the FileChooser.
-        export XDG_DATA_DIRS=$HOME/.nix-profile/share:/usr/local/share:/usr/share
-                '';
-      packages = [ 
-        pdsdk
-        pdc
-        pdutil
-        pds
-        pkgs.gcc-arm-embedded # Used for building C projects.
-      ];
-    };
-  in
-  {
-    packages.x86_64-linux.PlaydateSimualtor = pds;
-    packages.x86_64-linux.pdc = pdc;
-    packages.x86_64-linux.pdutil = pdutil;
-    defaultPackage.x86_64-linux = shell;
-  };
+
 }
+
