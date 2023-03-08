@@ -6,10 +6,10 @@
   outputs = { self, nixpkgs }:
     with import nixpkgs { system = "x86_64-linux"; };
     let
-      version = "1.12.3";
+      version = "1.13.1";
       playdateSDK = pkgs.fetchurl {
         url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
-        sha256 = "6QZb7Ie6LaSAa5fK8qjDGSWt4AzgCimFo2IGp685XWo=";
+        sha256 = "rMjVT9j2p3JBlJfCdmTOOLJ1k7580LETG+sAVIcKhzs=";
       };
       pdc = stdenv.mkDerivation rec {
         name = "pdc-${version}";
@@ -20,7 +20,7 @@
         installPhase = ''
           tar xvfz $src
           mkdir -p $out/bin
-          cp -r PlaydateSDK-1.12.3/bin/pdc $out/bin/pdc
+          cp -r PlaydateSDK-${version}/bin/pdc $out/bin/pdc
         '';
         sourceRoot = ".";
         meta = with lib; {
@@ -38,7 +38,7 @@
         installPhase = ''
                     tar xvfz $src
                     mkdir -p $out/bin
-          cp -r PlaydateSDK-1.12.3/bin/pdutil $out/bin/pdutil
+          cp -r PlaydateSDK-${version}/bin/pdutil $out/bin/pdutil
         '';
         sourceRoot = ".";
         meta = with lib; {
@@ -56,7 +56,7 @@
         installPhase = ''
           tar xvfz $src
           mkdir -p $out/bin
-          cp -r PlaydateSDK-1.12.3/bin/PlaydateSimulator $out/bin/pds
+          cp -r PlaydateSDK-${version}/bin/PlaydateSimulator $out/bin/pds
         '';
         sourceRoot = ".";
         meta = with lib; {
@@ -75,7 +75,7 @@
                     if ! [[ -d $HOME/playdatesdk-${version} ]]; then
                           tar -xzvf ${playdateSDK}
                           mkdir $HOME/playdatesdk-${version}
-                          mv PlaydateSDK-1.12.3/* $HOME/playdatesdk-${version}
+                          mv PlaydateSDK-${version}/* $HOME/playdatesdk-${version}
                           ln -sf ${pdc}/bin/pdc $HOME/playdatesdk-${version}/bin/pdc
                           ln -sf ${pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
                           ln -sf ${PlaydateSimulatorWrapped}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
