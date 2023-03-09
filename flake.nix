@@ -6,10 +6,10 @@
   outputs = { self, nixpkgs }:
     with import nixpkgs { system = "x86_64-linux"; };
     let
-      version = "1.13.1";
+      version = "1.13.2";
       playdateSDK = pkgs.fetchurl {
         url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
-        sha256 = "rMjVT9j2p3JBlJfCdmTOOLJ1k7580LETG+sAVIcKhzs=";
+        sha256 = "oJYksh51FxmWa27B4+qT05DmgC1vpK+PGTXscoDPI1M=";
       };
       pdc = stdenv.mkDerivation rec {
         name = "pdc-${version}";
