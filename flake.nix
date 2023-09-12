@@ -1,22 +1,22 @@
 {
   description = "A collection of tools to help with developing for Panic's Playdate.";
 
-  inputs = { nixpkgs.url = "github:NixOS/nixpkgs"; };
+  inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05"; };
 
   outputs = { self, nixpkgs }:
     with import nixpkgs { system = "x86_64-linux"; };
     let
-      version = "1.13.2";
+      version = "2.0.3";
       playdateSDK = pkgs.fetchurl {
         url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
-        sha256 = "oJYksh51FxmWa27B4+qT05DmgC1vpK+PGTXscoDPI1M=";
+        sha256 = "FNzb3OjXGZpTTuR9+ox9KZD0sKlYfoA7jg48lZeQrpE=";
       };
       pdc = stdenv.mkDerivation rec {
         name = "pdc-${version}";
         src = playdateSDK;
         nativeBuildInputs = [ autoPatchelfHook ];
 
-        buildInputs = [ pkgs.zlib pkgs.libpng ];
+        buildInputs = [ pkgs.zlib pkgs.libpng pkgs.stdenv.cc.cc.lib ];
         installPhase = ''
           tar xfz $src
           mkdir -p $out/bin
