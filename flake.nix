@@ -36,8 +36,8 @@
 
         buildInputs = [ pkgs.zlib pkgs.libpng ];
         installPhase = ''
-                    tar xfz $src
-                    mkdir -p $out/bin
+          tar xfz $src
+          mkdir -p $out/bin
           cp -r PlaydateSDK-${version}/bin/pdutil $out/bin/pdutil
         '';
         sourceRoot = ".";
@@ -72,25 +72,25 @@
       };
       shell = pkgs.mkShell {
         shellHook = ''
-        printf "Configuring shell...\n"
-        if ! [[ -d $HOME/playdatesdk-${version} ]]; then
-                          printf "Playdate SDK not found, installing PlaydateSDK to $HOME/playdatesdk-${version}"
-                          tar -xzf ${playdateSDK}
-                          mkdir $HOME/playdatesdk-${version}
-                          mv PlaydateSDK-${version}/* $HOME/playdatesdk-${version}
-                          ln -sf ${pdc}/bin/pdc $HOME/playdatesdk-${version}/bin/pdc
-                          ln -sf ${pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
-                          ln -sf ${PlaydateSimulatorWrapped}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
-                          printf "\nInstalled PlaydateSDK to $HOME/playdatesdk-${version}!\n"
-                          fi
-                          if ! [[ -d "$HOME/.Playdate Simulator/" ]]; then
-                          printf "Playdate Simulator config not found, configuring $HOME/.Playdate Simulator/Playdate Simulator.ini to use the Playdate SDK..."
-                          mkdir $HOME/.Playdate\ Simulator/
-                          echo "SDKDirectory=$HOME/playdatesdk-${version}" >> "$HOME/.Playdate Simulator/Playdate Simulator.ini"
-                          printf "\nConfigured Playdate Simulator!\n"
+          printf "Configuring shell...\n"
+          if ! [[ -d $HOME/playdatesdk-${version} ]]; then
+            printf "Playdate SDK not found, installing PlaydateSDK to $HOME/playdatesdk-${version}"
+            tar -xzf ${playdateSDK}
+            mkdir $HOME/playdatesdk-${version}
+            mv PlaydateSDK-${version}/* $HOME/playdatesdk-${version}
+            ln -sf ${pdc}/bin/pdc $HOME/playdatesdk-${version}/bin/pdc
+            ln -sf ${pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
+            ln -sf ${PlaydateSimulatorWrapped}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
+            printf "\nInstalled PlaydateSDK to $HOME/playdatesdk-${version}!\n"
+            fi
+            if ! [[ -d "$HOME/.Playdate Simulator/" ]]; then
+            printf "Playdate Simulator config not found, configuring $HOME/.Playdate Simulator/Playdate Simulator.ini to use the Playdate SDK..."
+            mkdir $HOME/.Playdate\ Simulator/
+            echo "SDKDirectory=$HOME/playdatesdk-${version}" >> "$HOME/.Playdate Simulator/Playdate Simulator.ini"
+            printf "\nConfigured Playdate Simulator!\n"
           fi
-                          export PLAYDATE_SDK_PATH=$HOME/playdatesdk-${version}
-        printf "Finished configuring, you are ready to go!"
+          export PLAYDATE_SDK_PATH=$HOME/playdatesdk-${version}
+          printf "Finished configuring, you are ready to go!\n"
         '';
         packages = [ PlaydateSimulatorWrapped pdc pdutil ];
       };
