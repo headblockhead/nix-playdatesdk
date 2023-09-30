@@ -82,8 +82,8 @@
             ln -sf ${pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
             ln -sf ${PlaydateSimulatorWrapped}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
             printf "\nInstalled PlaydateSDK to $HOME/playdatesdk-${version}!\n"
-            fi
-            if ! [[ -d "$HOME/.Playdate Simulator/" ]]; then
+          fi
+          if ! [[ -d "$HOME/.Playdate Simulator/" ]]; then
             printf "Playdate Simulator config not found, configuring $HOME/.Playdate Simulator/Playdate Simulator.ini to use the Playdate SDK..."
             mkdir $HOME/.Playdate\ Simulator/
             echo "SDKDirectory=$HOME/playdatesdk-${version}" >> "$HOME/.Playdate Simulator/Playdate Simulator.ini"
@@ -101,6 +101,4 @@
       packages.x86_64-linux.PlaydateSimulator = PlaydateSimulatorWrapped;
       defaultPackage.x86_64-linux = shell;
     };
-
 }
-
