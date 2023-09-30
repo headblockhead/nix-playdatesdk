@@ -11,7 +11,7 @@
         url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
         sha256 = "FNzb3OjXGZpTTuR9+ox9KZD0sKlYfoA7jg48lZeQrpE=";
       };
-      pdc = stdenv.mkDerivation rec {
+      pdc = stdenv.mkDerivation {
         name = "pdc-${version}";
         src = playdateSDK;
         nativeBuildInputs = [ autoPatchelfHook ];
@@ -29,7 +29,7 @@
           platforms = platforms.linux;
         };
       };
-      pdutil = stdenv.mkDerivation rec {
+      pdutil = stdenv.mkDerivation {
         name = "pdutil-${version}";
         src = playdateSDK;
         nativeBuildInputs = [ autoPatchelfHook ];
@@ -47,7 +47,7 @@
           platforms = platforms.linux;
         };
       };
-      PlaydateSimulator = stdenv.mkDerivation rec {
+      PlaydateSimulator = stdenv.mkDerivation {
         name = "PlaydateSimulator-${version}";
         src = playdateSDK;
         nativeBuildInputs = [ autoPatchelfHook ];
