@@ -1,26 +1,48 @@
 {
   description = "A collection of tools to help with developing for Panic's Playdate.";
 
-  inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05"; };
+  inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; };
 
   outputs = { self, nixpkgs }:
     with import nixpkgs { system = "x86_64-linux"; };
     let
-      version = "2.1.1";
+      version = "2.6.0";
       playdateSDK = pkgs.fetchurl {
         url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
-        sha256 = "19nz9dm4i1gazdhkjyk4b2p7g8l7v157b0pgs97kzvfjs57nhjc0";
+        sha256 = "sha256-OlXuzW62wtBJVm8+CV/rS+lAjffTBBVm8IaQYK8n5/Q=";
       };
-      pdc = stdenv.mkDerivation {
+      dynamicLinker = "${pkgs.glibc}/lib/ld-linux-x86-64.so.2";
+      pdsBuildInputs = [
+        pkgs.zlib
+        pkgs.libpng
+        pkgs.udev
+        pkgs.gtk3
+        pkgs.pango
+        pkgs.cairo
+        pkgs.gdk-pixbuf
+        pkgs.glib
+        pkgs.webkitgtk
+        pkgs.xorg.libX11
+        pkgs.stdenv.cc.cc.lib
+        pkgs.libxkbcommon
+        pkgs.wayland
+        pkgs.libpulseaudio
+        pkgs.gsettings-desktop-schemas
+      ];
+    in
+    rec {
+      packages.x86_64-linux.pdc = stdenv.mkDerivation {
         name = "pdc-${version}";
         src = playdateSDK;
         nativeBuildInputs = [ autoPatchelfHook ];
 
         buildInputs = [ pkgs.zlib pkgs.libpng pkgs.stdenv.cc.cc.lib ];
         installPhase = ''
-          tar xfz $src
-          mkdir -p $out/bin
-          cp -r PlaydateSDK-${version}/bin/pdc $out/bin/pdc
+          runHook preInstall
+            tar xfz $src
+            mkdir -p $out/bin
+            cp -r PlaydateSDK-${version}/bin/pdc $out/bin/pdc
+            runHook postInstall
         '';
         sourceRoot = ".";
         meta = with lib; {
@@ -29,16 +51,18 @@
           platforms = platforms.linux;
         };
       };
-      pdutil = stdenv.mkDerivation {
+      packages.x86_64-linux.pdutil = stdenv.mkDerivation {
         name = "pdutil-${version}";
         src = playdateSDK;
         nativeBuildInputs = [ autoPatchelfHook ];
 
         buildInputs = [ pkgs.zlib pkgs.libpng ];
         installPhase = ''
-          tar xfz $src
-          mkdir -p $out/bin
-          cp -r PlaydateSDK-${version}/bin/pdutil $out/bin/pdutil
+                          runHook preInstall
+                  tar xfz $src
+                  mkdir -p $out/bin
+                  cp -r PlaydateSDK-${version}/bin/pdutil $out/bin/pdutil
+          runHook postInstall
         '';
         sourceRoot = ".";
         meta = with lib; {
@@ -47,16 +71,27 @@
           platforms = platforms.linux;
         };
       };
-      PlaydateSimulator = stdenv.mkDerivation {
+      packages.x86_64-linux.PlaydateSimulator = stdenv.mkDerivation {
         name = "PlaydateSimulator-${version}";
         src = playdateSDK;
-        nativeBuildInputs = [ autoPatchelfHook ];
-
-        buildInputs = [ pkgs.webkitgtk ];
+        nativeBuildInputs = [ pkgs.makeWrapper wrapGAppsHook ];
+        dontFixup = true;
+        buildInputs = pdsBuildInputs;
         installPhase = ''
-          tar xfz $src
-          mkdir -p $out/bin
-          cp -r PlaydateSDK-${version}/bin/PlaydateSimulator $out/bin/pds
+                  runHook preInstall
+                    tar xfz $src
+                    mkdir -p $out/opt/playdate-sdk-${version}
+                    cp -r PlaydateSDK-${version}/* $out/opt/playdate-sdk-${version}
+                    ln -s $out/opt/playdate-sdk-${version} $out/opt/playdate-sdk
+              patchelf \
+                --set-interpreter "${dynamicLinker}" \
+                --set-rpath "${lib.makeLibraryPath pdsBuildInputs}"\
+                $out/opt/playdate-sdk-${version}/bin/PlaydateSimulator
+
+                    mkdir -p $out/bin
+          makeWrapper $out/opt/playdate-sdk-${version}/bin/PlaydateSimulator $out/bin/PlaydateSimulator \
+            --suffix XDG_DATA_DIRS : ${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}
+                runHook postInstall
         '';
         sourceRoot = ".";
         meta = with lib; {
@@ -65,40 +100,23 @@
           platforms = platforms.linux;
         };
       };
-      PlaydateSimulatorWrapped = pkgs.buildFHSUserEnv {
-        name = "PlaydateSimulator";
-        targetPkgs = pkgs: [ pkgs.alsa-lib PlaydateSimulator ];
-        runScript = "pds";
-      };
-      shell = pkgs.mkShell {
+      devShells.x86_64-linux.default = pkgs.mkShell {
         shellHook = ''
-          printf "Configuring shell...\n"
           if ! [[ -d $HOME/playdatesdk-${version} ]]; then
-            printf "Playdate SDK not found, installing PlaydateSDK to $HOME/playdatesdk-${version}"
+            printf "Installing PlaydateSDK to $HOME/playdatesdk-${version}"
             tar -xzf ${playdateSDK}
             mkdir $HOME/playdatesdk-${version}
             mv PlaydateSDK-${version}/* $HOME/playdatesdk-${version}
-            ln -sf ${pdc}/bin/pdc $HOME/playdatesdk-${version}/bin/pdc
-            ln -sf ${pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
-            ln -sf ${PlaydateSimulatorWrapped}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
+            ln -sf ${packages.x86_64-linux.pdc}/bin/pdc $HOME/playdatesdk-${version}/bin/pdc
+            ln -sf ${packages.x86_64-linux.pdutil}/bin/pdutil $HOME/playdatesdk-${version}/bin/pdutil
+            ln -sf ${packages.x86_64-linux.PlaydateSimulator}/bin/PlaydateSimulator $HOME/playdatesdk-${version}/bin/PlaydateSimulator
             printf "\nInstalled PlaydateSDK to $HOME/playdatesdk-${version}!\n"
           fi
-          if ! [[ -d "$HOME/.Playdate Simulator/" ]]; then
-            printf "Playdate Simulator config not found, configuring $HOME/.Playdate Simulator/Playdate Simulator.ini to use the Playdate SDK..."
-            mkdir $HOME/.Playdate\ Simulator/
-            echo "SDKDirectory=$HOME/playdatesdk-${version}" >> "$HOME/.Playdate Simulator/Playdate Simulator.ini"
-            printf "\nConfigured Playdate Simulator!\n"
-          fi
+          export SDL_AUDIODRIVER=pulseaudio
           export PLAYDATE_SDK_PATH=$HOME/playdatesdk-${version}
-          printf "Finished configuring, you are ready to go!\n"
+          printf "reminder: PlaydateSimulator must be manually configured to use $HOME/playdatesdk-${version} as the SDK path\n"
         '';
-        packages = [ PlaydateSimulatorWrapped pdc pdutil ];
+        packages = [ packages.x86_64-linux.pdc packages.x86_64-linux.pdutil packages.x86_64-linux.PlaydateSimulator ];
       };
-
-    in {
-      packages.x86_64-linux.pdc = pdc;
-      packages.x86_64-linux.pdutil = pdutil;
-      packages.x86_64-linux.PlaydateSimulator = PlaydateSimulatorWrapped;
-      defaultPackage.x86_64-linux = shell;
     };
 }
