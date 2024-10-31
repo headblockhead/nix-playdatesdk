@@ -1,8 +1,19 @@
 # nix-playdatesdk
 A nix flake to provide the PlayDate SDK tools.
 
-## Using this flake
-Simply run ```nix develop github:headblockhead/nix-playdatesdk``` and the commands ```PlaydateSimulator```, ```pdc``` and ```pdutil``` will make themselves avalible, or run ```nix shell github:headblockhead/nix-playdatesdk\#PlaydateSimualtor```,```nix shell github:headblockhead/nix-playdatesdk\#pdc``` or ```nix shell github:headblockhead/nix-playdatesdk\#pdutil``` for individual packages.
+## Usage
 
-## Warning!
-Unless you are inside the `nix develop` shell (which will download the sdk to your `$HOME`), you will have to download the SDK from Panic at https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-2.1.1.tar.gz and set PLAYDATE_SDK_PATH yourself.
+Use the development shell.
+
+```bash
+nix develop github:headblockhead/nix-playdatesdk
+```
+
+Or, run an individual tool.
+
+```bash
+nix run github:headblockhead/nix-playdatesdk#pdc
+```
+
+> [!NOTE]
+> The development shell creates a copy of the SDK at `$HOME/playdatesdk-${version}` as the Playdate Simulator requires a writeable copy of the Disk folder. If you don't want to use the shell, you can manually download the SDK and set the `PLAYDATE_SDK_PATH` environment variable to the path of the SDK.
