@@ -1,15 +1,15 @@
 {
   description = "A collection of tools to help with developing for Panic's Playdate.";
 
-  inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; };
+  inputs = { nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11"; };
 
   outputs = { self, nixpkgs }:
     with import nixpkgs { system = "x86_64-linux"; };
     let
-      version = "2.6.0";
+      version = "2.6.2";
       playdateSDK = pkgs.fetchurl {
         url = "https://download.panic.com/playdate_sdk/Linux/PlaydateSDK-${version}.tar.gz";
-        sha256 = "sha256-OlXuzW62wtBJVm8+CV/rS+lAjffTBBVm8IaQYK8n5/Q=";
+        sha256 = "sha256-GDqXXPgBYSiKuxcV3M/Ho5ALX5IAOkx6neK6bZKYt7E=";
       };
       dynamicLinker = "${pkgs.glibc}/lib/ld-linux-x86-64.so.2";
       pdsBuildInputs = [
@@ -21,7 +21,7 @@
         pkgs.cairo
         pkgs.gdk-pixbuf
         pkgs.glib
-        pkgs.webkitgtk
+        pkgs.webkitgtk_4_0
         pkgs.xorg.libX11
         pkgs.stdenv.cc.cc.lib
         pkgs.libxkbcommon
