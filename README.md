@@ -3,7 +3,7 @@ A nix flake to provide the PlayDate SDK tools.
 
 ## Usage
 
-Use the development shell.
+Use the development shell to use all tools in the SDK.
 
 ```bash
 nix develop github:headblockhead/nix-playdatesdk
@@ -16,4 +16,9 @@ nix run github:headblockhead/nix-playdatesdk#pdc
 ```
 
 > [!NOTE]
-> The development shell creates a copy of the SDK at `$HOME/playdatesdk-${version}` as the Playdate Simulator requires a writeable copy of the Disk folder. If you don't want to use the shell, you can manually download the SDK and set the `PLAYDATE_SDK_PATH` environment variable to the path of the SDK.
+> `PlaydateSimulator` requires a writeable copy of the SDK to run, to store its Disk.
+> You can use the copy-sdk script to create a writeable copy of the SDK to `$HOME/.local/share/playdate-sdk-${version}`.
+> ```bash
+> nix run github:headblockhead/nix-playdatesdk#copy-sdk
+> ```
+> Then, choose the directory when prompted by the simulator.
