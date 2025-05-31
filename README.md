@@ -15,7 +15,7 @@ Or, run an individual tool.
 nix run github:headblockhead/nix-playdatesdk#pdc
 ```
 
-> [!NOTE]
+> [!IMPORTANT]
 > `PlaydateSimulator` requires a writeable copy of the SDK to run, to store its Disk.
 > You can use the copy-sdk script to create a writeable copy of the SDK to `$HOME/.local/share/playdate-sdk-${version}`.
 > ```bash
