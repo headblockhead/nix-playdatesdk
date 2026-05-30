@@ -97,19 +97,15 @@
     rec {
       packages.x86_64-linux.pdc = pdc;
       packages.x86_64-linux.pdutil = pdutil;
-      packages.x86_64-linux.PlaydateSimulator = pkgs.writeShellApplication {
-        name = "PlaydateSimulator";
-        runtimeInputs = [ PlaydateSimulator ];
-        text = ''
-          if [ ! -d "${writeableSDKPath}" ]; then
-            echo "Playdate SDK copied to ${writeableSDKPath}"
-            mkdir -p "${writeableSDKPath}"
-            cp -r ${src}/. "${writeableSDKPath}"
-            chmod -R u+w "${writeableSDKPath}"
-          fi
-          PLAYDATE_SDK_PATH=${writeableSDKPath} PlaydateSimulator
-        '';
-      };
+      packages.x86_64-linux.PlaydateSimulator = pkgs.writeShellScriptBin "PlaydateSimulator" ''
+        if [ ! -d "${writeableSDKPath}" ]; then
+          echo "Playdate SDK copied to ${writeableSDKPath}"
+          mkdir -p "${writeableSDKPath}"
+          cp -r ${src}/. "${writeableSDKPath}"
+          chmod -R u+w "${writeableSDKPath}"
+        fi
+        PLAYDATE_SDK_PATH=${writeableSDKPath} ${PlaydateSimulator}/bin/PlaydateSimulator "$@"
+      '';
       packages.x86_64-linux.default = packages.x86_64-linux.PlaydateSimulator;
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = [
