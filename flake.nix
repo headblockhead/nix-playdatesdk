@@ -99,10 +99,10 @@
       packages.x86_64-linux.pdutil = pdutil;
       packages.x86_64-linux.PlaydateSimulator = pkgs.writeShellScriptBin "PlaydateSimulator" ''
         if [ ! -d "${writeableSDKPath}" ]; then
-          echo "Playdate SDK copied to ${writeableSDKPath}"
           mkdir -p "${writeableSDKPath}"
           cp -r ${src}/. "${writeableSDKPath}"
           chmod -R u+w "${writeableSDKPath}"
+          printf "Playdate SDK copied to ${writeableSDKPath}\n"
         fi
         PLAYDATE_SDK_PATH=${writeableSDKPath} ${PlaydateSimulator}/bin/PlaydateSimulator "$@"
       '';
